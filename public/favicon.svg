@@ -1,0 +1,18 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="16" cy="16" r="15" fill="#FF6B6B"/>
+  <g transform="translate(6, 5)">
+    <!-- Ribbon vertical -->
+    <rect x="8.5" y="0" width="3" height="22" rx="0.5" fill="white"/>
+    <!-- Box bottom -->
+    <rect x="2" y="10" width="16" height="12" rx="1.5" fill="white" fill-opacity="0.9"/>
+    <!-- Box top/lid -->
+    <rect x="1" y="6" width="18" height="6" rx="1" fill="white"/>
+    <!-- Bow left -->
+    <ellipse cx="7" cy="5" rx="3.5" ry="3" fill="white"/>
+    <!-- Bow right -->
+    <ellipse cx="13" cy="5" rx="3.5" ry="3" fill="white"/>
+    <!-- Bow center -->
+    <circle cx="10" cy="6" r="2.5" fill="#FF6B6B"/>
+  </g>
+</svg>
+

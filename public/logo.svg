@@ -1,0 +1,25 @@
+<svg width="200" height="50" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gift box icon -->
+  <g transform="translate(0, 5)">
+    <!-- Ribbon vertical -->
+    <rect x="17" y="0" width="6" height="40" rx="1" fill="#FF6B6B"/>
+    <!-- Ribbon horizontal -->
+    <rect x="5" y="15" width="30" height="6" rx="1" fill="#FF6B6B"/>
+    <!-- Box bottom -->
+    <rect x="5" y="18" width="30" height="22" rx="3" fill="#FFA8A8"/>
+    <!-- Box top/lid -->
+    <rect x="3" y="12" width="34" height="10" rx="2" fill="#FF8787"/>
+    <!-- Bow left -->
+    <ellipse cx="14" cy="10" rx="6" ry="5" fill="#FF6B6B"/>
+    <!-- Bow right -->
+    <ellipse cx="26" cy="10" rx="6" ry="5" fill="#FF6B6B"/>
+    <!-- Bow center -->
+    <circle cx="20" cy="12" r="4" fill="#FA5252"/>
+  </g>
+  
+  <!-- Text "Gifted" -->
+  <text x="50" y="35" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="32" font-weight="700" fill="#212121">
+    <tspan fill="#FF6B6B">G</tspan>ifted
+  </text>
+</svg>
+
