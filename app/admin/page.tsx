@@ -240,7 +240,7 @@ export default function AdminPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="sholiuk@gmail.com"
+                  placeholder="you@example.com"
                   className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B]"
                   required
                 />
@@ -283,7 +283,7 @@ export default function AdminPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="sholiuk@gmail.com"
+                  placeholder="you@example.com"
                   className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B]"
                   required
                 />
