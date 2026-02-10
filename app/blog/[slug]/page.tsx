@@ -45,20 +45,19 @@ export async function generateMetadata({
 
 // Simple markdown-like rendering (converts basic markdown to HTML)
 function renderContent(content: string) {
-  // This is a simple renderer - for production you might want a proper markdown library
   let html = content
-    // Headers
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    // Headers - add section wrapper for spacing
+    .replace(/^### (.*$)/gim, '</section><section class="content-section"><h3>$1</h3>')
+    .replace(/^## (.*$)/gim, '</section><section class="content-section"><h2>$1</h2>')
+    .replace(/^# (.*$)/gim, '</section><section class="content-section"><h1>$1</h1>')
     // Bold
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     // Italic
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     // Links
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-    // Images
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" />')
+    // Images - with figure wrapper
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<figure><img src="$2" alt="$1" loading="lazy" /><figcaption>$1</figcaption></figure>')
     // Unordered lists
     .replace(/^\- (.*$)/gim, '<li>$1</li>')
     // Blockquotes
@@ -68,11 +67,11 @@ function renderContent(content: string) {
     // Line breaks to paragraphs
     .split('\n\n')
     .map(para => {
-      if (para.startsWith('<h') || para.startsWith('<li') || para.startsWith('<blockquote') || para.startsWith('<hr')) {
+      if (para.startsWith('<') || para.startsWith('</')) {
         return para;
       }
       if (para.trim()) {
-        return `<p>${para.replace(/\n/g, '<br />')}</p>`;
+        return `<p>${para.replace(/\n/g, ' ')}</p>`;
       }
       return '';
     })
@@ -80,8 +79,19 @@ function renderContent(content: string) {
 
   // Wrap consecutive <li> items in <ul>
   html = html.replace(/(<li>.*?<\/li>\n?)+/g, '<ul>$&</ul>');
+  
+  // Clean up empty sections
+  html = html.replace(/<section class="content-section"><\/section>/g, '');
+  html = '<section class="content-section">' + html + '</section>';
 
   return html;
+}
+
+// Calculate reading time
+function getReadingTime(content: string): number {
+  const wordsPerMinute = 200;
+  const words = content.trim().split(/\s+/).length;
+  return Math.ceil(words / wordsPerMinute);
 }
 
 export default async function BlogPostPage({
@@ -97,11 +107,12 @@ export default async function BlogPostPage({
   }
 
   const contentHtml = renderContent(post.content);
+  const readingTime = getReadingTime(post.content);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+    <div className="min-h-screen bg-[#FAFAFA]">
+      {/* Navigation - transparent on hero */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-100">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo-icon.svg" alt="Gifted" width={40} height={40} />
@@ -123,82 +134,132 @@ export default async function BlogPostPage({
         </div>
       </nav>
 
-      {/* Article */}
-      <article className="pt-32 pb-20 px-6">
-        <div className="max-w-3xl mx-auto">
-          {/* Back link */}
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-neutral-600 hover:text-[#FF6B6B] transition mb-8"
-          >
-            <span>←</span> Back to Blog
-          </Link>
-
-          {/* Header */}
-          <header className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <time className="text-sm text-neutral-500">
-                {post.published_at && new Date(post.published_at).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </time>
-              {post.author && (
-                <>
-                  <span className="text-neutral-300">•</span>
-                  <span className="text-sm text-neutral-500">
-                    By {post.author}
-                  </span>
-                </>
-              )}
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">{post.title}</h1>
-            {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3 py-1 bg-[#FFF5F5] text-[#FF6B6B] text-sm rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
+      {/* Hero Section with Cover Image */}
+      <header className="pt-20">
+        {post.cover_image ? (
+          <div className="relative h-[50vh] min-h-[400px] max-h-[500px]">
+            {/* Background Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={post.cover_image}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+            
+            {/* Content Overlay */}
+            <div className="absolute inset-0 flex items-end">
+              <div className="max-w-3xl mx-auto px-6 pb-12 w-full">
+                <Link
+                  href="/blog"
+                  className="inline-flex items-center gap-2 text-white/80 hover:text-white transition mb-6 text-sm"
+                >
+                  <span>←</span> Back to Blog
+                </Link>
+                
+                {post.tags && post.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-medium rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                  {post.title}
+                </h1>
+                
+                <div className="flex items-center gap-4 text-white/80 text-sm">
+                  <time>
+                    {post.published_at && new Date(post.published_at).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </time>
+                  <span>•</span>
+                  <span>{readingTime} min read</span>
+                  {post.author && (
+                    <>
+                      <span>•</span>
+                      <span>By {post.author}</span>
+                    </>
+                  )}
+                </div>
               </div>
-            )}
-          </header>
+            </div>
+          </div>
+        ) : (
+          // Fallback header without image
+          <div className="pt-12 pb-8 px-6 bg-gradient-to-br from-[#FF6B6B] to-[#FA5252]">
+            <div className="max-w-3xl mx-auto">
+              <Link
+                href="/blog"
+                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition mb-6 text-sm"
+              >
+                <span>←</span> Back to Blog
+              </Link>
+              
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                {post.title}
+              </h1>
+              
+              <div className="flex items-center gap-4 text-white/80 text-sm">
+                <time>
+                  {post.published_at && new Date(post.published_at).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </time>
+                <span>•</span>
+                <span>{readingTime} min read</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </header>
 
-          {/* Cover Image */}
-          {post.cover_image && (
-            <div className="mb-10">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={post.cover_image}
-                alt={post.title}
-                className="w-full aspect-[2/1] object-cover rounded-2xl shadow-lg"
-              />
+      {/* Article Content */}
+      <article className="relative">
+        <div className="max-w-2xl mx-auto px-6">
+          {/* Excerpt/Intro */}
+          {post.excerpt && (
+            <div className="py-10 border-b border-neutral-200">
+              <p className="text-xl text-neutral-600 leading-relaxed font-light">
+                {post.excerpt}
+              </p>
             </div>
           )}
 
-          {/* Content */}
+          {/* Main Content */}
           <div
-            className="prose max-w-none"
+            className="prose py-12"
             dangerouslySetInnerHTML={{ __html: contentHtml }}
           />
 
-          {/* CTA */}
-          <div className="mt-12 p-8 bg-gradient-to-br from-[#FF6B6B] to-[#FA5252] rounded-2xl text-white text-center">
-            <h3 className="text-2xl font-bold mb-2">
-              Ready to find the perfect gift?
+          {/* CTA Card */}
+          <div className="my-16 p-10 bg-white rounded-3xl shadow-xl text-center border border-neutral-100">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#FF6B6B] to-[#FA5252] rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <span className="text-3xl">🎁</span>
+            </div>
+            <h3 className="text-2xl font-bold mb-3">
+              Never give a boring gift again
             </h3>
-            <p className="text-white/80 mb-6">
-              Join the waitlist and be the first to try Gifted.
+            <p className="text-neutral-600 mb-8 max-w-md mx-auto">
+              Gifted helps you discover perfect presents with a simple swipe. Join thousands on the waitlist.
             </p>
             <Link
               href="/#waitlist"
-              className="inline-block bg-white text-[#FF6B6B] px-6 py-3 rounded-full font-semibold hover:shadow-lg transition"
+              className="inline-block bg-gradient-to-r from-[#FF6B6B] to-[#FA5252] text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all"
             >
-              Join the Waitlist
+              Join the Waitlist →
             </Link>
           </div>
         </div>
