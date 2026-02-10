@@ -1,10 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getPostBySlug, getAllPostSlugs } from "@/lib/blog";
+import { getPostBySlug, getAllPostSlugs, BlogPost } from "@/lib/supabase";
+
+export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const slugs = getAllPostSlugs();
+  const slugs = await getAllPostSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
@@ -21,9 +23,65 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${post.title} - Gifted Blog`,
-    description: post.excerpt,
+    title: post.seo_title || `${post.title} | Gifted Blog`,
+    description: post.seo_description || post.excerpt || `Read ${post.title} on the Gifted blog.`,
+    keywords: post.seo_keywords || post.tags,
+    openGraph: {
+      title: post.seo_title || post.title,
+      description: post.seo_description || post.excerpt,
+      type: "article",
+      publishedTime: post.published_at,
+      authors: [post.author],
+      images: post.cover_image ? [post.cover_image] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.seo_title || post.title,
+      description: post.seo_description || post.excerpt,
+      images: post.cover_image ? [post.cover_image] : [],
+    },
   };
+}
+
+// Simple markdown-like rendering (converts basic markdown to HTML)
+function renderContent(content: string) {
+  // This is a simple renderer - for production you might want a proper markdown library
+  let html = content
+    // Headers
+    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    // Bold
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Italic
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Links
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    // Images
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" />')
+    // Unordered lists
+    .replace(/^\- (.*$)/gim, '<li>$1</li>')
+    // Blockquotes
+    .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+    // Horizontal rules
+    .replace(/^---$/gim, '<hr />')
+    // Line breaks to paragraphs
+    .split('\n\n')
+    .map(para => {
+      if (para.startsWith('<h') || para.startsWith('<li') || para.startsWith('<blockquote') || para.startsWith('<hr')) {
+        return para;
+      }
+      if (para.trim()) {
+        return `<p>${para.replace(/\n/g, '<br />')}</p>`;
+      }
+      return '';
+    })
+    .join('\n');
+
+  // Wrap consecutive <li> items in <ul>
+  html = html.replace(/(<li>.*?<\/li>\n?)+/g, '<ul>$&</ul>');
+
+  return html;
 }
 
 export default async function BlogPostPage({
@@ -37,6 +95,8 @@ export default async function BlogPostPage({
   if (!post) {
     notFound();
   }
+
+  const contentHtml = renderContent(post.content);
 
   return (
     <div className="min-h-screen bg-white">
@@ -78,7 +138,7 @@ export default async function BlogPostPage({
           <header className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <time className="text-sm text-neutral-500">
-                {new Date(post.date).toLocaleDateString("en-GB", {
+                {post.published_at && new Date(post.published_at).toLocaleDateString("en-GB", {
                   day: "numeric",
                   month: "long",
                   year: "numeric",
@@ -109,21 +169,22 @@ export default async function BlogPostPage({
           </header>
 
           {/* Cover Image */}
-          {post.coverImage && (
+          {post.cover_image && (
             <div className="aspect-[2/1] relative rounded-2xl overflow-hidden mb-8">
               <Image
-                src={post.coverImage}
+                src={post.cover_image}
                 alt={post.title}
                 fill
                 className="object-cover"
+                priority
               />
             </div>
           )}
 
           {/* Content */}
           <div
-            className="prose prose-lg max-w-none prose-headings:font-semibold prose-a:text-[#FF6B6B] prose-a:no-underline hover:prose-a:underline"
-            dangerouslySetInnerHTML={{ __html: post.content || "" }}
+            className="prose max-w-none"
+            dangerouslySetInnerHTML={{ __html: contentHtml }}
           />
 
           {/* CTA */}
@@ -143,6 +204,38 @@ export default async function BlogPostPage({
           </div>
         </div>
       </article>
+
+      {/* SEO: Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": post.title,
+            "description": post.excerpt,
+            "image": post.cover_image,
+            "datePublished": post.published_at,
+            "dateModified": post.updated_at,
+            "author": {
+              "@type": "Person",
+              "name": post.author
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "Gifted",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.thegiftedapp.com/logo-icon.svg"
+              }
+            },
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": `https://www.thegiftedapp.com/blog/${post.slug}`
+            }
+          })
+        }}
+      />
 
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-neutral-100">

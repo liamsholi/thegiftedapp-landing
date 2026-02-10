@@ -101,3 +101,111 @@ body {
   border-radius: 2rem;
   overflow: hidden;
 }
+
+/* Blog prose styling */
+.prose {
+  color: var(--neutral-800);
+  line-height: 1.8;
+}
+
+.prose h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: var(--neutral-900);
+}
+
+.prose h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--neutral-900);
+}
+
+.prose h3 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--neutral-900);
+}
+
+.prose p {
+  margin-bottom: 1.25rem;
+}
+
+.prose ul, .prose ol {
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
+.prose li {
+  margin-bottom: 0.5rem;
+}
+
+.prose a {
+  color: var(--primary-500);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.prose a:hover {
+  text-decoration: underline;
+}
+
+.prose blockquote {
+  border-left: 4px solid var(--primary-500);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--neutral-600);
+}
+
+.prose img {
+  border-radius: 0.75rem;
+  margin: 1.5rem 0;
+  max-width: 100%;
+  height: auto;
+}
+
+.prose strong {
+  font-weight: 600;
+  color: var(--neutral-900);
+}
+
+.prose code {
+  background: var(--neutral-100);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.prose pre {
+  background: var(--neutral-900);
+  color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.prose pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--neutral-200);
+  margin: 2rem 0;
+}

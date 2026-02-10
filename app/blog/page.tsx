@@ -1,14 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getAllPosts } from "@/lib/blog";
+import { getAllPublishedPosts, BlogPost } from "@/lib/supabase";
 
 export const metadata = {
-  title: "Blog - Gifted",
-  description: "Gift-giving tips, ideas, and inspiration from the Gifted team.",
+  title: "Gift Ideas Blog | Gifted - Tips, Guides & Inspiration",
+  description: "Discover the best gift ideas, buying guides, and inspiration for every occasion. Expert tips to help you find the perfect present.",
+  keywords: ["gift ideas", "gift guide", "present ideas", "birthday gifts", "christmas gifts", "gift inspiration"],
+  openGraph: {
+    title: "Gift Ideas Blog | Gifted",
+    description: "Discover the best gift ideas, buying guides, and inspiration for every occasion.",
+    type: "website",
+  },
 };
 
-export default function BlogPage() {
-  const posts = getAllPosts();
+// Revalidate every 60 seconds
+export const revalidate = 60;
+
+export default async function BlogPage() {
+  const posts = await getAllPublishedPosts();
 
   return (
     <div className="min-h-screen bg-white">
@@ -58,51 +67,76 @@ export default function BlogPage() {
             </div>
           ) : (
             <div className="grid gap-8">
-              {posts.map((post) => (
-                <Link
-                  key={post.slug}
-                  href={`/blog/${post.slug}`}
-                  className="group block bg-white border border-neutral-200 rounded-2xl overflow-hidden hover:shadow-lg transition"
-                >
-                  {post.coverImage && (
-                    <div className="aspect-[2/1] relative bg-neutral-100">
-                      <Image
-                        src={post.coverImage}
-                        alt={post.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <time className="text-sm text-neutral-500">
-                        {new Date(post.date).toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </time>
-                      {post.tags && post.tags.length > 0 && (
-                        <>
-                          <span className="text-neutral-300">•</span>
-                          <span className="text-sm text-[#FF6B6B]">
-                            {post.tags[0]}
-                          </span>
-                        </>
+              {posts.map((post: BlogPost) => (
+                <article key={post.id}>
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="group block bg-white border border-neutral-200 rounded-2xl overflow-hidden hover:shadow-lg transition"
+                  >
+                    {post.cover_image && (
+                      <div className="aspect-[2/1] relative bg-neutral-100">
+                        <Image
+                          src={post.cover_image}
+                          alt={post.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <time className="text-sm text-neutral-500">
+                          {post.published_at && new Date(post.published_at).toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </time>
+                        {post.tags && post.tags.length > 0 && (
+                          <>
+                            <span className="text-neutral-300">•</span>
+                            <span className="text-sm text-[#FF6B6B]">
+                              {post.tags[0]}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <h2 className="text-xl font-semibold mb-2 group-hover:text-[#FF6B6B] transition">
+                        {post.title}
+                      </h2>
+                      {post.excerpt && (
+                        <p className="text-neutral-600">{post.excerpt}</p>
                       )}
                     </div>
-                    <h2 className="text-xl font-semibold mb-2 group-hover:text-[#FF6B6B] transition">
-                      {post.title}
-                    </h2>
-                    <p className="text-neutral-600">{post.excerpt}</p>
-                  </div>
-                </Link>
+                  </Link>
+                </article>
               ))}
             </div>
           )}
         </div>
       </section>
+
+      {/* SEO: Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            "name": "Gifted Blog",
+            "description": "Gift-giving tips, inspiration, and ideas",
+            "url": "https://www.thegiftedapp.com/blog",
+            "publisher": {
+              "@type": "Organization",
+              "name": "Gifted",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.thegiftedapp.com/logo-icon.svg"
+              }
+            }
+          })
+        }}
+      />
 
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-neutral-100">
