@@ -48,7 +48,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Minimal Navigation - No distracting links */}
+      {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -57,9 +57,14 @@ export default function Home() {
               <span className="text-[#FF6B6B]">G</span>ifted
             </span>
           </div>
-          <a href="#signup" className="btn-primary text-sm py-2 px-5">
-            Get Early Access
-          </a>
+          <div className="flex items-center gap-6">
+            <a href="/blog" className="text-sm font-medium text-neutral-600 hover:text-[#FF6B6B] transition">
+              Blog
+            </a>
+            <a href="#signup" className="btn-primary text-sm py-2 px-5">
+              Get Early Access
+            </a>
+          </div>
         </div>
       </nav>
 
@@ -70,15 +75,13 @@ export default function Home() {
             {/* Left: Content + CTA */}
             <div className="text-center lg:text-left order-2 lg:order-1">
               {/* Trust indicator */}
-              {waitlistCount > 0 && (
-                <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                  <span className="flex h-2 w-2 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  {waitlistCount}+ people already waiting
-                </div>
-              )}
+              <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                Join hundreds of smart gift-givers
+              </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] mb-5">
                 Stop Guessing.<br />
@@ -369,7 +372,7 @@ export default function Home() {
               Ready to become a better gift-giver?
             </h2>
             <p className="text-white/80 mb-8 max-w-md mx-auto">
-              Join {waitlistCount > 0 ? `${waitlistCount}+ others` : "the waitlist"} and be first to try Gifted when we launch.
+              Join thousands of others and be first to try Gifted when we launch.
             </p>
             
             {!submitted ? (
@@ -381,7 +384,7 @@ export default function Home() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className="flex-1 px-5 py-4 rounded-full text-neutral-900 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50"
+                  className="flex-1 px-5 py-4 rounded-full bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50"
                 />
                 <button 
                   type="submit" 
