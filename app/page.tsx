@@ -100,9 +100,34 @@ export default function Home() {
                     </button>
                   </form>
                 ) : (
-                  <div className="bg-green-50 text-green-700 px-6 py-4 rounded-2xl">
-                    <p className="font-medium">🎉 You&apos;re on the list!</p>
-                    <p className="text-sm mt-1">We&apos;ll notify you when Gifted launches.</p>
+                  <div className="bg-gradient-to-br from-[#FFF5F5] to-[#FFE8E8] border border-[#FFD4D4] px-6 py-6 rounded-2xl text-center">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                      <span className="text-3xl">🎉</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-[#FF6B6B] mb-2">You&apos;re on the list!</h3>
+                    <p className="text-neutral-700 mb-4">
+                      Thanks for joining! We&apos;ll let you know as soon as Gifted is ready to download.
+                    </p>
+                    <div className="bg-white/60 rounded-xl p-4 text-left">
+                      <p className="text-sm font-medium text-neutral-800 mb-2">What happens next?</p>
+                      <ul className="text-sm text-neutral-600 space-y-2">
+                        <li className="flex items-start gap-2">
+                          <span className="text-[#FF6B6B]">✓</span>
+                          <span>You&apos;ll be first to get early access</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-[#FF6B6B]">✓</span>
+                          <span>Exclusive launch-day perks for waitlisters</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-[#FF6B6B]">✓</span>
+                          <span>Sneak peeks and updates before anyone else</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-4">
+                      Follow us on social media for gift inspiration in the meantime! 🎁
+                    </p>
                   </div>
                 )}
                 {error && (
