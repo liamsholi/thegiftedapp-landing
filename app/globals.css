@@ -102,17 +102,17 @@ body {
   overflow: hidden;
 }
 
-/* Blog prose styling - Clean, readable, well-spaced */
+/* Blog prose styling - Clean, readable, compact */
 .prose {
-  color: #374151;
-  font-size: 1.0625rem;
-  line-height: 1.9;
-  letter-spacing: -0.01em;
+  color: #4B5563;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  letter-spacing: 0;
 }
 
 /* Content sections for better spacing */
 .prose .content-section {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .prose .content-section:first-child {
@@ -120,44 +120,46 @@ body {
 }
 
 .prose h1 {
-  font-size: 1.875rem;
+  font-size: var(--heading-h1, 1.5rem);
   font-weight: 700;
-  margin-bottom: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
   color: #111827;
   line-height: 1.3;
-  letter-spacing: -0.02em;
 }
 
 .prose h2 {
-  font-size: 1.5rem;
+  font-size: var(--heading-h2, 1.25rem);
   font-weight: 700;
-  margin-bottom: 1.25rem;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
   color: #111827;
   line-height: 1.35;
-  letter-spacing: -0.02em;
 }
 
 .prose h3 {
-  font-size: 1.1875rem;
+  font-size: var(--heading-h3, 1.0625rem);
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
   color: #111827;
   line-height: 1.4;
 }
 
 .prose p {
-  margin-bottom: 1.75rem;
+  margin-bottom: var(--paragraph-spacing, 1.25rem);
 }
 
+/* Lists - proper formatting */
 .prose ul, .prose ol {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   padding-left: 0;
   list-style: none;
 }
 
 .prose li {
-  margin-bottom: 0.875rem;
-  padding-left: 1.75rem;
+  margin-bottom: 0.625rem;
+  padding-left: 1.5rem;
   position: relative;
 }
 
@@ -165,9 +167,9 @@ body {
   content: "";
   position: absolute;
   left: 0;
-  top: 0.6em;
-  width: 6px;
-  height: 6px;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
   background: var(--primary-500);
   border-radius: 50%;
 }
@@ -186,28 +188,37 @@ body {
   left: 0;
   color: var(--primary-500);
   font-weight: 600;
+  font-size: 0.875rem;
 }
 
+/* Bold text that starts a line = list item style */
+.prose p > strong:first-child {
+  display: block;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+/* Links */
 .prose a {
   color: var(--primary-500);
   text-decoration: none;
   font-weight: 500;
-  border-bottom: 1px solid transparent;
   transition: all 0.2s ease;
 }
 
 .prose a:hover {
   color: var(--primary-700);
-  border-bottom-color: var(--primary-500);
+  text-decoration: underline;
 }
 
+/* Blockquotes */
 .prose blockquote {
-  border-left: 4px solid var(--primary-500);
-  margin: 2.5rem 0;
-  padding: 1.5rem 1.5rem 1.5rem 2rem;
-  background: linear-gradient(135deg, #FFF5F5 0%, #FFF 100%);
-  border-radius: 0 1rem 1rem 0;
-  font-size: 1.125rem;
+  border-left: 3px solid var(--primary-500);
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+  background: #FFF5F5;
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-size: 0.9375rem;
   font-style: italic;
   color: #4B5563;
 }
@@ -216,23 +227,24 @@ body {
   margin-bottom: 0;
 }
 
+/* Images */
 .prose figure {
-  margin: 2.5rem 0;
+  margin: 1.5rem 0;
 }
 
 .prose img {
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   max-width: 100%;
   height: auto;
   display: block;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .prose figcaption {
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: #6B7280;
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   font-style: italic;
 }
 
@@ -240,27 +252,29 @@ body {
   display: none;
 }
 
+/* Strong/Bold */
 .prose strong {
   font-weight: 600;
-  color: #111827;
+  color: #1F2937;
 }
 
+/* Code */
 .prose code {
   background: #F3F4F6;
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.375rem;
-  font-size: 0.9em;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
   font-family: 'SF Mono', Monaco, monospace;
 }
 
 .prose pre {
   background: #1F2937;
   color: #F9FAFB;
-  padding: 1.5rem;
-  border-radius: 1rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
   overflow-x: auto;
-  margin: 2rem 0;
-  font-size: 0.875rem;
+  margin: 1.5rem 0;
+  font-size: 0.8125rem;
 }
 
 .prose pre code {
@@ -268,16 +282,24 @@ body {
   padding: 0;
 }
 
+/* Horizontal rules */
 .prose hr {
   border: none;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #E5E7EB, transparent);
-  margin: 3.5rem 0;
+  background: #E5E7EB;
+  margin: 2rem 0;
 }
 
-/* Intro paragraph styling */
-.prose p:first-of-type {
-  font-size: 1.125rem;
-  color: #4B5563;
-  line-height: 1.8;
+/* First paragraph - slightly larger */
+.prose > p:first-of-type {
+  font-size: 1rem;
+  color: #374151;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

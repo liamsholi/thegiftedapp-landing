@@ -67,3 +67,33 @@ export async function getAllPostSlugs(): Promise<string[]> {
 
   return data?.map(p => p.slug) || [];
 }
+
+export interface BlogTheme {
+  fontSize: "small" | "base" | "large";
+  lineHeight: "tight" | "normal" | "relaxed";
+  maxWidth: "xl" | "2xl" | "3xl";
+  headingSize: "small" | "normal" | "large";
+  paragraphSpacing: "tight" | "normal" | "relaxed";
+}
+
+export async function getBlogTheme(): Promise<BlogTheme> {
+  const defaultTheme: BlogTheme = {
+    fontSize: "base",
+    lineHeight: "normal",
+    maxWidth: "2xl",
+    headingSize: "normal",
+    paragraphSpacing: "normal",
+  };
+
+  const { data, error } = await supabase
+    .from('blog_settings')
+    .select('setting_value')
+    .eq('setting_key', 'theme')
+    .single();
+
+  if (error || !data) {
+    return defaultTheme;
+  }
+
+  return data.setting_value as BlogTheme;
+}

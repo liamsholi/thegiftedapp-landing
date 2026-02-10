@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getPostBySlug, getAllPostSlugs, BlogPost } from "@/lib/supabase";
+import { getPostBySlug, getAllPostSlugs, getBlogTheme, BlogPost, BlogTheme } from "@/lib/supabase";
 
 export const revalidate = 60;
 
@@ -43,48 +43,99 @@ export async function generateMetadata({
   };
 }
 
-// Simple markdown-like rendering (converts basic markdown to HTML)
+// Improved markdown rendering with better list handling
 function renderContent(content: string) {
-  let html = content
-    // Headers - add section wrapper for spacing
-    .replace(/^### (.*$)/gim, '</section><section class="content-section"><h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '</section><section class="content-section"><h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '</section><section class="content-section"><h1>$1</h1>')
-    // Bold
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // Italic
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-    // Images - with figure wrapper
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<figure><img src="$2" alt="$1" loading="lazy" /><figcaption>$1</figcaption></figure>')
-    // Unordered lists
-    .replace(/^\- (.*$)/gim, '<li>$1</li>')
-    // Blockquotes
-    .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
-    // Horizontal rules
-    .replace(/^---$/gim, '<hr />')
-    // Line breaks to paragraphs
-    .split('\n\n')
-    .map(para => {
-      if (para.startsWith('<') || para.startsWith('</')) {
-        return para;
-      }
-      if (para.trim()) {
-        return `<p>${para.replace(/\n/g, ' ')}</p>`;
-      }
-      return '';
-    })
-    .join('\n');
-
-  // Wrap consecutive <li> items in <ul>
-  html = html.replace(/(<li>.*?<\/li>\n?)+/g, '<ul>$&</ul>');
+  // First, normalize line endings
+  let text = content.replace(/\r\n/g, '\n');
   
-  // Clean up empty sections
-  html = html.replace(/<section class="content-section"><\/section>/g, '');
-  html = '<section class="content-section">' + html + '</section>';
-
+  // Split into lines for processing
+  const lines = text.split('\n');
+  const processedLines: string[] = [];
+  let inList = false;
+  let listItems: string[] = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    
+    // Check if line starts with "- " or "* " (list item)
+    const listMatch = line.match(/^[\-\*]\s+(.+)$/);
+    
+    // Check if line is a bold item that should be a list (pattern: **Bold text** followed by description)
+    const boldListMatch = line.match(/^\*\*([^*]+)\*\*[:\s]*(.*)$/);
+    
+    if (listMatch) {
+      if (!inList) {
+        inList = true;
+        listItems = [];
+      }
+      listItems.push(`<li>${processInlineMarkdown(listMatch[1])}</li>`);
+    } else if (boldListMatch && !line.startsWith('#')) {
+      // Convert bold-starting lines to proper list items
+      if (!inList) {
+        inList = true;
+        listItems = [];
+      }
+      const title = boldListMatch[1];
+      const desc = boldListMatch[2] ? ` ${processInlineMarkdown(boldListMatch[2])}` : '';
+      listItems.push(`<li><strong>${title}</strong>${desc}</li>`);
+    } else {
+      // Close any open list
+      if (inList && listItems.length > 0) {
+        processedLines.push(`<ul>${listItems.join('')}</ul>`);
+        listItems = [];
+        inList = false;
+      }
+      
+      // Process the line
+      if (line.match(/^###\s+(.+)$/)) {
+        const match = line.match(/^###\s+(.+)$/);
+        processedLines.push(`<h3>${match![1]}</h3>`);
+      } else if (line.match(/^##\s+(.+)$/)) {
+        const match = line.match(/^##\s+(.+)$/);
+        processedLines.push(`<h2>${match![1]}</h2>`);
+      } else if (line.match(/^#\s+(.+)$/)) {
+        const match = line.match(/^#\s+(.+)$/);
+        processedLines.push(`<h1>${match![1]}</h1>`);
+      } else if (line.match(/^>\s*(.+)$/)) {
+        const match = line.match(/^>\s*(.+)$/);
+        processedLines.push(`<blockquote>${processInlineMarkdown(match![1])}</blockquote>`);
+      } else if (line.match(/^---$/)) {
+        processedLines.push('<hr />');
+      } else if (line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)) {
+        const match = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+        processedLines.push(`<figure><img src="${match![2]}" alt="${match![1]}" loading="lazy" /><figcaption>${match![1]}</figcaption></figure>`);
+      } else if (line.trim() === '') {
+        processedLines.push('');
+      } else {
+        processedLines.push(`<p>${processInlineMarkdown(line)}</p>`);
+      }
+    }
+  }
+  
+  // Close any remaining list
+  if (inList && listItems.length > 0) {
+    processedLines.push(`<ul>${listItems.join('')}</ul>`);
+  }
+  
+  // Join and clean up consecutive empty paragraphs
+  let html = processedLines.join('\n');
+  html = html.replace(/<p><\/p>/g, '');
+  html = html.replace(/\n+/g, '\n');
+  
   return html;
+}
+
+// Process inline markdown (bold, italic, links)
+function processInlineMarkdown(text: string): string {
+  return text
+    // Links first (before bold/italic to avoid conflicts)
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    // Bold
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    // Italic
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    // Inline images
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" class="inline-image" />');
 }
 
 // Calculate reading time
@@ -94,13 +145,37 @@ function getReadingTime(content: string): number {
   return Math.ceil(words / wordsPerMinute);
 }
 
+// Generate theme-based CSS classes
+function getThemeStyles(theme: BlogTheme) {
+  const fontSizes = { small: "0.875rem", base: "0.9375rem", large: "1.0625rem" };
+  const lineHeights = { tight: 1.5, normal: 1.7, relaxed: 1.9 };
+  const maxWidths = { xl: "36rem", "2xl": "42rem", "3xl": "48rem" };
+  const headingSizes = { 
+    small: { h1: "1.25rem", h2: "1.125rem", h3: "1rem" },
+    normal: { h1: "1.5rem", h2: "1.25rem", h3: "1.0625rem" },
+    large: { h1: "1.75rem", h2: "1.5rem", h3: "1.25rem" }
+  };
+  const paragraphSpacings = { tight: "1rem", normal: "1.25rem", relaxed: "1.75rem" };
+
+  return {
+    fontSize: fontSizes[theme.fontSize],
+    lineHeight: lineHeights[theme.lineHeight],
+    maxWidth: maxWidths[theme.maxWidth],
+    headingSizes: headingSizes[theme.headingSize],
+    paragraphSpacing: paragraphSpacings[theme.paragraphSpacing],
+  };
+}
+
 export default async function BlogPostPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const [post, theme] = await Promise.all([
+    getPostBySlug(slug),
+    getBlogTheme()
+  ]);
 
   if (!post) {
     notFound();
@@ -108,6 +183,7 @@ export default async function BlogPostPage({
 
   const contentHtml = renderContent(post.content);
   const readingTime = getReadingTime(post.content);
+  const themeStyles = getThemeStyles(theme);
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
@@ -254,6 +330,15 @@ export default async function BlogPostPage({
           {/* Main Content */}
           <div
             className="prose py-12"
+            style={{
+              fontSize: themeStyles.fontSize,
+              lineHeight: themeStyles.lineHeight,
+              // @ts-expect-error CSS custom properties
+              '--heading-h1': themeStyles.headingSizes.h1,
+              '--heading-h2': themeStyles.headingSizes.h2,
+              '--heading-h3': themeStyles.headingSizes.h3,
+              '--paragraph-spacing': themeStyles.paragraphSpacing,
+            }}
             dangerouslySetInnerHTML={{ __html: contentHtml }}
           />
 

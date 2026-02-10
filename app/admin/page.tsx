@@ -4,6 +4,14 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import type { BlogPost } from "@/lib/supabase";
 
+interface BlogTheme {
+  fontSize: "small" | "base" | "large";
+  lineHeight: "tight" | "normal" | "relaxed";
+  maxWidth: "xl" | "2xl" | "3xl";
+  headingSize: "small" | "normal" | "large";
+  paragraphSpacing: "tight" | "normal" | "relaxed";
+}
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,6 +25,15 @@ export default function AdminPage() {
   const [isNewPost, setIsNewPost] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [activeTab, setActiveTab] = useState<"posts" | "settings">("posts");
+  const [blogTheme, setBlogTheme] = useState<BlogTheme>({
+    fontSize: "base",
+    lineHeight: "normal",
+    maxWidth: "2xl",
+    headingSize: "normal",
+    paragraphSpacing: "normal",
+  });
+  const [savingTheme, setSavingTheme] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -42,8 +59,40 @@ export default function AdminPage() {
     if (session) {
       setIsAuthenticated(true);
       loadPosts();
+      loadThemeSettings();
     }
     setIsLoading(false);
+  }
+
+  async function loadThemeSettings() {
+    const { data, error } = await supabase
+      .from("blog_settings")
+      .select("setting_value")
+      .eq("setting_key", "theme")
+      .single();
+    
+    if (data && !error) {
+      setBlogTheme(data.setting_value as BlogTheme);
+    }
+  }
+
+  async function saveThemeSettings() {
+    setSavingTheme(true);
+    const { error } = await supabase
+      .from("blog_settings")
+      .upsert({
+        setting_key: "theme",
+        setting_value: blogTheme,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "setting_key" });
+    
+    setSavingTheme(false);
+    if (error) {
+      setMessage("Error saving theme settings");
+    } else {
+      setMessage("Theme settings saved!");
+    }
+    setTimeout(() => setMessage(""), 3000);
   }
 
   async function handleMagicLinkLogin(e: React.FormEvent) {
@@ -571,12 +620,14 @@ Regular paragraph text. **Bold text** and *italic text*.
             <span className="text-[#FF6B6B]">G</span>ifted Blog Admin
           </h1>
           <div className="flex gap-4">
-            <button
-              onClick={startNewPost}
-              className="bg-[#FF6B6B] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FA5252] transition"
-            >
-              + New Post
-            </button>
+            {activeTab === "posts" && (
+              <button
+                onClick={startNewPost}
+                className="bg-[#FF6B6B] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FA5252] transition"
+              >
+                + New Post
+              </button>
+            )}
             <button
               onClick={handleLogout}
               className="text-neutral-600 hover:text-neutral-900"
@@ -586,75 +637,252 @@ Regular paragraph text. **Bold text** and *italic text*.
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="flex gap-1 mb-6 bg-neutral-200 p-1 rounded-lg w-fit">
+          <button
+            onClick={() => setActiveTab("posts")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+              activeTab === "posts"
+                ? "bg-white text-neutral-900 shadow-sm"
+                : "text-neutral-600 hover:text-neutral-900"
+            }`}
+          >
+            Posts
+          </button>
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+              activeTab === "settings"
+                ? "bg-white text-neutral-900 shadow-sm"
+                : "text-neutral-600 hover:text-neutral-900"
+            }`}
+          >
+            Theme Settings
+          </button>
+        </div>
+
         {message && (
           <div className={`p-4 rounded-lg mb-6 ${message.includes("Error") ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"}`}>
             {message}
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          {posts.length === 0 ? (
-            <div className="p-12 text-center">
-              <span className="text-4xl mb-4 block">📝</span>
-              <p className="text-neutral-600 mb-4">No blog posts yet</p>
-              <button
-                onClick={startNewPost}
-                className="text-[#FF6B6B] font-semibold hover:underline"
-              >
-                Create your first post →
-              </button>
+        {/* Settings Tab */}
+        {activeTab === "settings" && (
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-lg font-semibold mb-6">Blog Theme Settings</h2>
+            <p className="text-sm text-neutral-500 mb-6">
+              Adjust the global appearance of your blog posts. Changes apply to all posts.
+            </p>
+
+            <div className="space-y-6">
+              {/* Font Size */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Body Font Size</label>
+                <div className="flex gap-2">
+                  {(["small", "base", "large"] as const).map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setBlogTheme({ ...blogTheme, fontSize: size })}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                        blogTheme.fontSize === size
+                          ? "bg-[#FF6B6B] text-white"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                      }`}
+                    >
+                      {size === "small" ? "Small (14px)" : size === "base" ? "Medium (15px)" : "Large (17px)"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Line Height */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Line Height</label>
+                <div className="flex gap-2">
+                  {(["tight", "normal", "relaxed"] as const).map((height) => (
+                    <button
+                      key={height}
+                      onClick={() => setBlogTheme({ ...blogTheme, lineHeight: height })}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                        blogTheme.lineHeight === height
+                          ? "bg-[#FF6B6B] text-white"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                      }`}
+                    >
+                      {height === "tight" ? "Tight (1.5)" : height === "normal" ? "Normal (1.7)" : "Relaxed (1.9)"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Content Width */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Content Width</label>
+                <div className="flex gap-2">
+                  {(["xl", "2xl", "3xl"] as const).map((width) => (
+                    <button
+                      key={width}
+                      onClick={() => setBlogTheme({ ...blogTheme, maxWidth: width })}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                        blogTheme.maxWidth === width
+                          ? "bg-[#FF6B6B] text-white"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                      }`}
+                    >
+                      {width === "xl" ? "Narrow" : width === "2xl" ? "Medium" : "Wide"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Heading Size */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Heading Size</label>
+                <div className="flex gap-2">
+                  {(["small", "normal", "large"] as const).map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setBlogTheme({ ...blogTheme, headingSize: size })}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                        blogTheme.headingSize === size
+                          ? "bg-[#FF6B6B] text-white"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                      }`}
+                    >
+                      {size === "small" ? "Compact" : size === "normal" ? "Normal" : "Large"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Paragraph Spacing */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Paragraph Spacing</label>
+                <div className="flex gap-2">
+                  {(["tight", "normal", "relaxed"] as const).map((spacing) => (
+                    <button
+                      key={spacing}
+                      onClick={() => setBlogTheme({ ...blogTheme, paragraphSpacing: spacing })}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                        blogTheme.paragraphSpacing === spacing
+                          ? "bg-[#FF6B6B] text-white"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                      }`}
+                    >
+                      {spacing === "tight" ? "Compact" : spacing === "normal" ? "Normal" : "Spacious"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <div className="pt-4 border-t">
+                <button
+                  onClick={saveThemeSettings}
+                  disabled={savingTheme}
+                  className="bg-[#FF6B6B] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FA5252] transition disabled:opacity-50"
+                >
+                  {savingTheme ? "Saving..." : "Save Theme Settings"}
+                </button>
+              </div>
             </div>
-          ) : (
-            <table className="w-full">
-              <thead className="bg-neutral-50 border-b">
-                <tr>
-                  <th className="text-left px-6 py-4 font-semibold">Title</th>
-                  <th className="text-left px-6 py-4 font-semibold">Status</th>
-                  <th className="text-left px-6 py-4 font-semibold">Date</th>
-                  <th className="text-right px-6 py-4 font-semibold">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {posts.map((post) => (
-                  <tr key={post.id} className="border-b hover:bg-neutral-50">
-                    <td className="px-6 py-4">
-                      <div className="font-medium">{post.title}</div>
-                      <div className="text-sm text-neutral-500">/blog/{post.slug}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          post.published
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {post.published ? "Published" : "Draft"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-neutral-500">
-                      {new Date(post.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => editPost(post)}
-                        className="text-[#FF6B6B] hover:underline mr-4"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deletePost(post.id)}
-                        className="text-red-500 hover:underline"
-                      >
-                        Delete
-                      </button>
-                    </td>
+
+            {/* Preview */}
+            <div className="mt-8 pt-6 border-t">
+              <h3 className="text-sm font-medium mb-4 text-neutral-500">Preview</h3>
+              <div 
+                className="p-6 bg-neutral-50 rounded-lg prose"
+                style={{
+                  fontSize: blogTheme.fontSize === "small" ? "14px" : blogTheme.fontSize === "base" ? "15px" : "17px",
+                  lineHeight: blogTheme.lineHeight === "tight" ? 1.5 : blogTheme.lineHeight === "normal" ? 1.7 : 1.9,
+                  maxWidth: blogTheme.maxWidth === "xl" ? "36rem" : blogTheme.maxWidth === "2xl" ? "42rem" : "48rem",
+                }}
+              >
+                <h2 style={{
+                  fontSize: blogTheme.headingSize === "small" ? "1.125rem" : blogTheme.headingSize === "normal" ? "1.25rem" : "1.5rem",
+                }}>
+                  Sample Heading
+                </h2>
+                <p style={{
+                  marginBottom: blogTheme.paragraphSpacing === "tight" ? "1rem" : blogTheme.paragraphSpacing === "normal" ? "1.25rem" : "1.75rem",
+                }}>
+                  This is a sample paragraph to preview how your blog content will look with the current theme settings. The text size, line height, and spacing all affect readability.
+                </p>
+                <p>
+                  Another paragraph follows to show the spacing between content blocks.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Posts Tab */}
+        {activeTab === "posts" && (
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            {posts.length === 0 ? (
+              <div className="p-12 text-center">
+                <span className="text-4xl mb-4 block">📝</span>
+                <p className="text-neutral-600 mb-4">No blog posts yet</p>
+                <button
+                  onClick={startNewPost}
+                  className="text-[#FF6B6B] font-semibold hover:underline"
+                >
+                  Create your first post →
+                </button>
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-neutral-50 border-b">
+                  <tr>
+                    <th className="text-left px-6 py-4 font-semibold">Title</th>
+                    <th className="text-left px-6 py-4 font-semibold">Status</th>
+                    <th className="text-left px-6 py-4 font-semibold">Date</th>
+                    <th className="text-right px-6 py-4 font-semibold">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+                </thead>
+                <tbody>
+                  {posts.map((post) => (
+                    <tr key={post.id} className="border-b hover:bg-neutral-50">
+                      <td className="px-6 py-4">
+                        <div className="font-medium">{post.title}</div>
+                        <div className="text-sm text-neutral-500">/blog/{post.slug}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            post.published
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {post.published ? "Published" : "Draft"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-neutral-500">
+                        {new Date(post.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => editPost(post)}
+                          className="text-[#FF6B6B] hover:underline mr-4"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deletePost(post.id)}
+                          className="text-red-500 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
 
         <div className="mt-6 text-center text-sm text-neutral-500">
           <a href="/blog" target="_blank" className="text-[#FF6B6B] hover:underline">
