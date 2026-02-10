@@ -10,6 +10,8 @@ export default function AdminPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [loginSuccess, setLoginSuccess] = useState("");
+  const [showPasswordLogin, setShowPasswordLogin] = useState(false);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isNewPost, setIsNewPost] = useState(false);
@@ -44,9 +46,29 @@ export default function AdminPage() {
     setIsLoading(false);
   }
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleMagicLinkLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoginError("");
+    setLoginSuccess("");
+    
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/admin`,
+      },
+    });
+
+    if (error) {
+      setLoginError(error.message);
+    } else {
+      setLoginSuccess("Check your email! We sent you a magic link to sign in.");
+    }
+  }
+
+  async function handlePasswordLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoginError("");
+    setLoginSuccess("");
     
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -192,46 +214,117 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
         <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
-          <h1 className="text-2xl font-bold mb-6 text-center">
+          <h1 className="text-2xl font-bold mb-2 text-center">
             <span className="text-[#FF6B6B]">G</span>ifted Admin
           </h1>
+          <p className="text-neutral-500 text-center mb-6">Blog Management</p>
           
-          <form onSubmit={handleLogin} className="space-y-4">
-            {loginError && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-                {loginError}
+          {loginError && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">
+              {loginError}
+            </div>
+          )}
+          
+          {loginSuccess && (
+            <div className="bg-green-50 text-green-600 p-3 rounded-lg text-sm mb-4">
+              ✓ {loginSuccess}
+            </div>
+          )}
+
+          {!showPasswordLogin ? (
+            // Magic Link Login (default)
+            <form onSubmit={handleMagicLinkLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="sholiuk@gmail.com"
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B]"
+                  required
+                />
               </div>
-            )}
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B]"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B]"
-                required
-              />
-            </div>
-            
-            <button
-              type="submit"
-              className="w-full bg-[#FF6B6B] text-white py-3 rounded-lg font-semibold hover:bg-[#FA5252] transition"
-            >
-              Sign In
-            </button>
-          </form>
+              
+              <button
+                type="submit"
+                className="w-full bg-[#FF6B6B] text-white py-3 rounded-lg font-semibold hover:bg-[#FA5252] transition"
+              >
+                Send Magic Link ✨
+              </button>
+              
+              <p className="text-center text-sm text-neutral-500">
+                We&apos;ll email you a secure link to sign in
+              </p>
+              
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-neutral-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-neutral-500">or</span>
+                </div>
+              </div>
+              
+              <button
+                type="button"
+                onClick={() => setShowPasswordLogin(true)}
+                className="w-full border border-neutral-300 text-neutral-700 py-3 rounded-lg font-medium hover:bg-neutral-50 transition"
+              >
+                Sign in with Password
+              </button>
+            </form>
+          ) : (
+            // Password Login
+            <form onSubmit={handlePasswordLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="sholiuk@gmail.com"
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B]"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B]"
+                  required
+                />
+              </div>
+              
+              <button
+                type="submit"
+                className="w-full bg-[#FF6B6B] text-white py-3 rounded-lg font-semibold hover:bg-[#FA5252] transition"
+              >
+                Sign In
+              </button>
+              
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-neutral-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-neutral-500">or</span>
+                </div>
+              </div>
+              
+              <button
+                type="button"
+                onClick={() => setShowPasswordLogin(false)}
+                className="w-full border border-neutral-300 text-neutral-700 py-3 rounded-lg font-medium hover:bg-neutral-50 transition"
+              >
+                Use Magic Link Instead ✨
+              </button>
+            </form>
+          )}
         </div>
       </div>
     );
