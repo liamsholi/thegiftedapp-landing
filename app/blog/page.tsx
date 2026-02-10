@@ -74,12 +74,12 @@ export default async function BlogPage() {
                     className="group block bg-white border border-neutral-200 rounded-2xl overflow-hidden hover:shadow-lg transition"
                   >
                     {post.cover_image && (
-                      <div className="aspect-[2/1] relative bg-neutral-100">
-                        <Image
+                      <div className="aspect-[2/1] relative bg-neutral-100 overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
                           src={post.cover_image}
                           alt={post.title}
-                          fill
-                          className="object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     )}
