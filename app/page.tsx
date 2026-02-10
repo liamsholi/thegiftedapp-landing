@@ -62,7 +62,7 @@ export default function Home() {
               Blog
             </a>
             <a href="#signup" className="btn-primary text-sm py-2 px-5">
-              Get Early Access
+              Join Waitlist
             </a>
           </div>
         </div>
@@ -75,12 +75,12 @@ export default function Home() {
             {/* Left: Content + CTA */}
             <div className="text-center lg:text-left order-2 lg:order-1">
               {/* Trust indicator */}
-              <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <div className="inline-flex items-center gap-2 bg-[#FFF5F5] text-[#FF6B6B] px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF6B6B] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF6B6B]"></span>
                 </span>
-                Join hundreds of smart gift-givers
+                🚀 Launching Soon — Join the Waitlist
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold leading-[1.1] mb-5">
@@ -113,7 +113,7 @@ export default function Home() {
                         className="btn-primary whitespace-nowrap disabled:opacity-50 py-4"
                         disabled={loading}
                       >
-                        {loading ? "Joining..." : "Get Early Access"}
+                        {loading ? "Joining..." : "Join Waitlist"}
                       </button>
                     </form>
                     {error && (
@@ -367,12 +367,15 @@ export default function Home() {
       {/* Final CTA */}
       <section className="py-20 px-6">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="bg-gradient-to-br from-[#FF6B6B] to-[#FA5252] rounded-3xl p-10 md:p-14 text-white">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <div className="bg-white rounded-3xl p-10 md:p-14 shadow-xl border border-neutral-100">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#FF6B6B] to-[#FA5252] rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <span className="text-3xl">🎁</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-neutral-900">
               Ready to become a better gift-giver?
             </h2>
-            <p className="text-white/80 mb-8 max-w-md mx-auto">
-              Join thousands of others and be first to try Gifted when we launch.
+            <p className="text-neutral-600 mb-8 max-w-md mx-auto">
+              Be the first to know when Gifted launches. Join the waitlist for exclusive early access.
             </p>
             
             {!submitted ? (
@@ -384,22 +387,23 @@ export default function Home() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className="flex-1 px-5 py-4 rounded-full bg-white text-neutral-900 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-50"
+                  className="flex-1 px-5 py-4 rounded-full border border-neutral-200 text-neutral-900 focus:outline-none focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/20 disabled:opacity-50"
                 />
                 <button 
                   type="submit" 
-                  className="bg-white text-[#FF6B6B] px-6 py-4 rounded-full font-semibold hover:shadow-lg transition whitespace-nowrap disabled:opacity-50"
+                  className="bg-gradient-to-r from-[#FF6B6B] to-[#FA5252] text-white px-6 py-4 rounded-full font-semibold hover:shadow-lg hover:shadow-[#FF6B6B]/30 transition whitespace-nowrap disabled:opacity-50"
                   disabled={loading}
                 >
-                  {loading ? "..." : "Join Free"}
+                  {loading ? "..." : "Join Waitlist"}
                 </button>
               </form>
             ) : (
-              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6">
+              <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
                 <span className="text-3xl mb-2 block">🎉</span>
-                <p className="font-semibold">You&apos;re on the list!</p>
+                <p className="font-semibold text-green-700">You&apos;re on the waitlist!</p>
               </div>
             )}
+            <p className="text-xs text-neutral-400 mt-4">Free forever. No spam. Unsubscribe anytime.</p>
           </div>
         </div>
       </section>
