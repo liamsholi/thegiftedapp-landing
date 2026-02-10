@@ -47,9 +47,14 @@ export default function Home() {
               <span className="text-[#FF6B6B]">G</span>ifted
             </span>
           </div>
-          <a href="#waitlist" className="btn-primary text-sm">
-            Join Waitlist
-          </a>
+          <div className="flex items-center gap-6">
+            <a href="/blog" className="text-neutral-600 hover:text-[#FF6B6B] transition font-medium">
+              Blog
+            </a>
+            <a href="#waitlist" className="btn-primary text-sm">
+              Join Waitlist
+            </a>
+          </div>
         </div>
       </nav>
 
@@ -286,6 +291,7 @@ export default function Home() {
             </div>
             
             <div className="flex gap-8 text-sm text-neutral-600">
+              <a href="/blog" className="hover:text-[#FF6B6B] transition">Blog</a>
               <a href="#" className="hover:text-[#FF6B6B] transition">Privacy</a>
               <a href="#" className="hover:text-[#FF6B6B] transition">Terms</a>
               <a href="mailto:hello@gifted.app" className="hover:text-[#FF6B6B] transition">Contact</a>
