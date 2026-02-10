@@ -229,6 +229,19 @@ export default async function BlogPostPage({
       {/* Article Content */}
       <article className="relative">
         <div className="max-w-2xl mx-auto px-6">
+          {/* Top CTA Banner */}
+          <div className="my-8 p-4 bg-gradient-to-r from-[#FFF5F5] to-[#FFE8E8] rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-neutral-700">
+              <span className="font-semibold">🎁 Looking for gift ideas?</span> Gifted app makes it easy.
+            </p>
+            <Link
+              href="/#signup"
+              className="text-sm font-semibold text-[#FF6B6B] hover:text-[#FA5252] whitespace-nowrap"
+            >
+              Get Early Access →
+            </Link>
+          </div>
+
           {/* Excerpt/Intro */}
           {post.excerpt && (
             <div className="py-10 border-b border-neutral-200">
@@ -244,23 +257,24 @@ export default async function BlogPostPage({
             dangerouslySetInnerHTML={{ __html: contentHtml }}
           />
 
-          {/* CTA Card */}
+          {/* Bottom CTA Card */}
           <div className="my-16 p-10 bg-white rounded-3xl shadow-xl text-center border border-neutral-100">
             <div className="w-16 h-16 bg-gradient-to-br from-[#FF6B6B] to-[#FA5252] rounded-2xl flex items-center justify-center mx-auto mb-6">
               <span className="text-3xl">🎁</span>
             </div>
             <h3 className="text-2xl font-bold mb-3">
-              Never give a boring gift again
+              Stop guessing. Start swiping.
             </h3>
             <p className="text-neutral-600 mb-8 max-w-md mx-auto">
-              Gifted helps you discover perfect presents with a simple swipe. Join thousands on the waitlist.
+              Gifted helps you discover perfect presents in seconds. Join the waitlist for early access.
             </p>
             <Link
-              href="/#waitlist"
+              href="/#signup"
               className="inline-block bg-gradient-to-r from-[#FF6B6B] to-[#FA5252] text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all"
             >
-              Join the Waitlist →
+              Get Early Access →
             </Link>
+            <p className="text-xs text-neutral-500 mt-4">Free forever. No spam.</p>
           </div>
         </div>
       </article>
