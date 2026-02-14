@@ -78,18 +78,34 @@ export default function AdminPage() {
 
   async function saveThemeSettings() {
     setSavingTheme(true);
-    const { error } = await supabase
+    
+    // First try to update existing record
+    const { error: updateError } = await supabase
       .from("blog_settings")
-      .upsert({
-        setting_key: "theme",
+      .update({
         setting_value: blogTheme,
         updated_at: new Date().toISOString(),
-      }, { onConflict: "setting_key" });
+      })
+      .eq("setting_key", "theme");
     
-    setSavingTheme(false);
-    if (error) {
-      setMessage("Error saving theme settings");
+    if (updateError) {
+      // If update fails, try insert
+      const { error: insertError } = await supabase
+        .from("blog_settings")
+        .insert({
+          setting_key: "theme",
+          setting_value: blogTheme,
+          updated_at: new Date().toISOString(),
+        });
+      
+      setSavingTheme(false);
+      if (insertError) {
+        setMessage("Error saving theme settings: " + insertError.message);
+      } else {
+        setMessage("Theme settings saved!");
+      }
     } else {
+      setSavingTheme(false);
       setMessage("Theme settings saved!");
     }
     setTimeout(() => setMessage(""), 3000);
