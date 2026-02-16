@@ -372,30 +372,32 @@ export default function Home() {
               <span className="text-3xl">🎁</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-neutral-900">
-              Ready to become a better gift-giver?
+              Ready to become a better<br className="hidden sm:block" /> gift giver?
             </h2>
             <p className="text-neutral-600 mb-8 max-w-md mx-auto">
               Be the first to know when Gifted launches. Join the waitlist for exclusive early access.
             </p>
             
             {!submitted ? (
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                  className="flex-1 px-5 py-4 rounded-full border border-neutral-200 text-neutral-900 focus:outline-none focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/20 disabled:opacity-50"
-                />
-                <button 
-                  type="submit" 
-                  className="bg-gradient-to-r from-[#FF6B6B] to-[#FA5252] text-white px-6 py-4 rounded-full font-semibold hover:shadow-lg hover:shadow-[#FF6B6B]/30 transition whitespace-nowrap disabled:opacity-50"
-                  disabled={loading}
-                >
-                  {loading ? "..." : "Join Waitlist"}
-                </button>
+              <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+                <div className="flex flex-col sm:flex-row sm:items-center border border-neutral-200 rounded-full p-1.5 focus-within:border-[#FF6B6B] focus-within:ring-2 focus-within:ring-[#FF6B6B]/20 transition">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                    className="flex-1 px-4 py-3 bg-transparent text-neutral-900 focus:outline-none disabled:opacity-50 text-center sm:text-left"
+                  />
+                  <button 
+                    type="submit" 
+                    className="bg-gradient-to-r from-[#FF6B6B] to-[#FA5252] text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg hover:shadow-[#FF6B6B]/30 transition whitespace-nowrap disabled:opacity-50"
+                    disabled={loading}
+                  >
+                    {loading ? "..." : "Join Waitlist"}
+                  </button>
+                </div>
               </form>
             ) : (
               <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
