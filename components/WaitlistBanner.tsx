@@ -32,29 +32,25 @@ export default function WaitlistBanner() {
 
   return (
     <>
-      {/* Sticky CTA Banner */}
+      {/* Subtle Sticky CTA Banner */}
       {!bannerDismissed && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-[#FF6B6B] to-[#FA5252] text-white py-3 px-4 shadow-lg">
-          <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span className="text-xl hidden sm:block">📱</span>
-              <p className="text-sm sm:text-base font-medium">
-                <span className="hidden sm:inline">Want this in a swipeable app? </span>
-                <span className="sm:hidden">Get the app! </span>
-                <button 
-                  onClick={() => setShowModal(true)}
-                  className="underline hover:no-underline font-semibold"
-                >
-                  Join the early access list!
-                </button>
-              </p>
-            </div>
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-neutral-200 py-2.5 px-4">
+          <div className="max-w-6xl mx-auto flex items-center justify-center gap-4">
+            <p className="text-sm text-neutral-600 text-center">
+              <span className="hidden sm:inline">Want this in a swipeable app? </span>
+              <button 
+                onClick={() => setShowModal(true)}
+                className="text-[#FF6B6B] hover:text-[#FA5252] font-medium hover:underline"
+              >
+                Join the early access list →
+              </button>
+            </p>
             <button 
               onClick={() => setBannerDismissed(true)}
-              className="text-white/80 hover:text-white p-1"
+              className="text-neutral-400 hover:text-neutral-600 p-1 absolute right-4"
               aria-label="Dismiss"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -135,7 +131,7 @@ export default function WaitlistBanner() {
       )}
 
       {/* Spacer for footer when banner is visible */}
-      {!bannerDismissed && <div className="h-14" />}
+      {!bannerDismissed && <div className="h-10" />}
     </>
   );
 }
