@@ -21,6 +21,32 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (response.ok) {
+        setSubmitted(true);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchPosts() {
@@ -75,6 +101,108 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
+      {/* Sticky CTA Banner */}
+      {!bannerDismissed && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-[#FF6B6B] to-[#FA5252] text-white py-3 px-4 shadow-lg">
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xl hidden sm:block">📱</span>
+              <p className="text-sm sm:text-base font-medium">
+                <span className="hidden sm:inline">Want this in a swipeable app? </span>
+                <span className="sm:hidden">Get the app! </span>
+                <button 
+                  onClick={() => setShowWaitlistModal(true)}
+                  className="underline hover:no-underline font-semibold"
+                >
+                  Join the early access list!
+                </button>
+              </p>
+            </div>
+            <button 
+              onClick={() => setBannerDismissed(true)}
+              className="text-white/80 hover:text-white p-1"
+              aria-label="Dismiss"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Waitlist Modal */}
+      {showWaitlistModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowWaitlistModal(false)}
+          />
+          <div className="relative bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <button 
+              onClick={() => setShowWaitlistModal(false)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            {!submitted ? (
+              <>
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF6B6B] to-[#FA5252] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl">🎁</span>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Get Early Access</h3>
+                  <p className="text-neutral-600">
+                    Swipe through gift ideas like dating apps. Save favourites. Never give a boring present again.
+                  </p>
+                </div>
+                
+                <form onSubmit={handleWaitlistSubmit} className="space-y-4">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/20"
+                  />
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full bg-gradient-to-r from-[#FF6B6B] to-[#FA5252] text-white py-3 rounded-xl font-semibold hover:shadow-lg transition disabled:opacity-50"
+                  >
+                    {submitting ? "Joining..." : "Join the Waitlist"}
+                  </button>
+                </form>
+                
+                <p className="text-xs text-neutral-400 text-center mt-4">
+                  Free forever. No spam. Unsubscribe anytime.
+                </p>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">🎉</span>
+                </div>
+                <h3 className="text-2xl font-bold mb-2 text-green-600">You&apos;re in!</h3>
+                <p className="text-neutral-600 mb-4">
+                  We&apos;ll email you when Gifted launches.
+                </p>
+                <button
+                  onClick={() => setShowWaitlistModal(false)}
+                  className="text-[#FF6B6B] font-medium hover:underline"
+                >
+                  Continue reading →
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-neutral-100">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -88,9 +216,12 @@ export default function BlogPage() {
             <Link href="/blog" className="text-[#FF6B6B] font-medium text-sm">
               Blog
             </Link>
-            <Link href="/#signup" className="btn-primary text-sm py-2 px-5">
-              Get Early Access
-            </Link>
+            <button 
+              onClick={() => setShowWaitlistModal(true)}
+              className="btn-primary text-sm py-2 px-5"
+            >
+              Join Waitlist
+            </button>
           </div>
         </div>
       </nav>
@@ -260,25 +391,28 @@ export default function BlogPage() {
       {/* CTA Section */}
       <section className="py-12 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-[#FF6B6B] to-[#FA5252] rounded-2xl p-8 md:p-10 text-white text-center">
+          <div className="bg-white rounded-2xl p-8 md:p-10 text-center shadow-lg border border-neutral-100">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#FF6B6B] to-[#FA5252] rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">📱</span>
+            </div>
             <h2 className="text-2xl md:text-3xl font-bold mb-3">
               Find gifts faster with Gifted
             </h2>
-            <p className="text-white/80 mb-6 max-w-md mx-auto">
+            <p className="text-neutral-600 mb-6 max-w-md mx-auto">
               Swipe through curated gift ideas and save favourites to wishlists. Coming soon to iOS & Android.
             </p>
-            <Link
-              href="/#signup"
-              className="inline-block bg-white text-[#FF6B6B] px-6 py-3 rounded-full font-semibold hover:shadow-lg transition"
+            <button
+              onClick={() => setShowWaitlistModal(true)}
+              className="inline-block bg-gradient-to-r from-[#FF6B6B] to-[#FA5252] text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg transition"
             >
-              Get Early Access
-            </Link>
+              Join the Waitlist
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-6 border-t border-neutral-200 bg-white">
+      {/* Footer - with padding for sticky banner */}
+      <footer className={`py-8 px-6 border-t border-neutral-200 bg-white ${!bannerDismissed ? 'pb-20' : ''}`}>
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-2">

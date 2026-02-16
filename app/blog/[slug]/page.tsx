@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getPostBySlug, getAllPostSlugs, getBlogTheme, BlogPost, BlogTheme } from "@/lib/supabase";
+import WaitlistBanner, { WaitlistButton } from "@/components/WaitlistBanner";
 
 export const revalidate = 60;
 
@@ -203,9 +204,7 @@ export default async function BlogPostPage({
             >
               Blog
             </Link>
-            <Link href="/#waitlist" className="btn-primary text-sm">
-              Join Waitlist
-            </Link>
+            <WaitlistButton />
           </div>
         </div>
       </nav>
@@ -395,6 +394,9 @@ export default async function BlogPostPage({
           })
         }}
       />
+
+      {/* Sticky Banner */}
+      <WaitlistBanner />
 
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-neutral-100">
