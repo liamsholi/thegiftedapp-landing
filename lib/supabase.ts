@@ -24,10 +24,13 @@ export interface BlogPost {
 }
 
 export async function getAllPublishedPosts(): Promise<BlogPost[]> {
+  const now = new Date().toISOString();
+  
   const { data, error } = await supabase
     .from('blog_posts')
     .select('*')
     .eq('published', true)
+    .lte('published_at', now) // Only show posts where published_at is in the past
     .order('published_at', { ascending: false });
 
   if (error) {
@@ -39,11 +42,14 @@ export async function getAllPublishedPosts(): Promise<BlogPost[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
+  const now = new Date().toISOString();
+  
   const { data, error } = await supabase
     .from('blog_posts')
     .select('*')
     .eq('slug', slug)
     .eq('published', true)
+    .lte('published_at', now) // Only show if published_at is in the past
     .single();
 
   if (error) {
@@ -55,10 +61,13 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
 }
 
 export async function getAllPostSlugs(): Promise<string[]> {
+  const now = new Date().toISOString();
+  
   const { data, error } = await supabase
     .from('blog_posts')
     .select('slug')
-    .eq('published', true);
+    .eq('published', true)
+    .lte('published_at', now);
 
   if (error) {
     console.error('Error fetching slugs:', error);
